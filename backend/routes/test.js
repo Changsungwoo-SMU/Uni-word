@@ -1,3 +1,25 @@
+const express = require('express');
+const router = express.Router();
+const pool = require('../config/db');
+const { verifyToken } = require('../middlewares/authMiddleware');
+
+// GET /test/questions — 테스트 문제 받기
+router.get('/questions', verifyToken, async (req, res) => {
+    const count = parseInt(req.query.count) || 10; // 문제 수 (기본 10개)
+
+    try {
+        // words 테이블에서 랜덤으로 문제 뽑기 (정답 word 필드는 제외)
+        const [rows] = await pool.query(
+            'SELECT id, mean, level FROM words ORDER BY RAND() LIMIT ?',
+            [count]
+        );
+        res.json({ success: true, questions: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+    }
+});
+
 // POST /test/submit — 테스트 제출
 router.post('/submit', verifyToken, async (req, res) => {
     const { answers } = req.body; // 사용자가 제출한 답안 배열
@@ -48,10 +70,12 @@ router.post('/submit', verifyToken, async (req, res) => {
         // 6. 채점 결과 응답
         res.json({
             success: true,
-            result: { test_result_id, total_count, correct_count, score, details }
+            result: { total_count, correct_count, score, details }
         });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
     }
 });
+
+module.exports = router;
