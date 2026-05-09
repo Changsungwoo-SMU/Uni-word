@@ -136,7 +136,8 @@ npm run dev
 
 기본 포트: `http://localhost:5173`
 
-`vite.config.js`의 프록시 설정으로 `/auth`, `/admin`, `/test`, `/words` 요청은 자동으로 백엔드(3000)로 전달됩니다. 별도 CORS 설정이 필요하지 않습니다.
+현재 README 기준으로는 `frontend/vite.config.js`의 백엔드 프록시 설정이 문서화되어 있지 않습니다.
+프론트엔드가 `http://localhost:5173``, 백엔드가 `http://localhost:3000`에서 별도 origin으로 실행된다면, API 호출을 위해 백엔드의 CORS 허용 설정 또는 별도의 개발 프록시 구성이 필요합니다.
 
 ### 4-5. 관리자 계정 만들기
 
