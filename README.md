@@ -173,7 +173,7 @@ UPDATE users SET role='admin' WHERE email='admin@example.com';
 | 홈 | `/home` | 단어 관리 메뉴 |
 | 단어 관리 | `/admin/words` | 단어 통계, 추가/수정/삭제, 레벨 필터 |
 
-학습자 전용 라우트(`/admin/words`)는 `ProtectedRoute`로 가드되어 있으며, 권한 없는 사용자가 직접 URL로 접근하면 자동으로 `/home`으로 리다이렉트됩니다.
+관리자 전용 라우트(`/admin/words`)는 `ProtectedRoute`로 가드되어 있으며, 권한 없는 사용자가 직접 URL로 접근하면 자동으로 `/home`으로 리다이렉트됩니다.
 
 ---
 
