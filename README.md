@@ -62,7 +62,7 @@ Uni-word/
     ├── index.html
     ├── package.json
     ├── vite.config.js          # 백엔드 프록시 설정 포함
-    ├── .env                    # VITE_API_URL
+    ├── .env                    # (배포 시 백엔드 주소 설정)
     ├── tailwind.config.js
     └── src/
         ├── main.jsx
