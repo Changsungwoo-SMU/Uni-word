@@ -55,4 +55,14 @@ INSERT INTO words (word, mean, pos, level) VALUES
 ('fluctuate', '변동하다', 'verb', 3),
 ('incorporate', '통합하다', 'verb', 3),
 ('procurement', '조달', 'noun', 3),
-('remuneration', '보수', 'noun', 3);
+('remuneration', '보수', 'noun', 3),
+('adversely', '불리하게, 반대로', 'adverb', 3),
+('commensurate', '상응하는', 'adjective', 3),
+('curtail', '축소하다, 삭감하다', 'verb', 3),
+('deteriorate', '악화되다', 'verb', 3),
+('discrepancy', '불일치, 차이', 'noun', 3),
+('imperative', '필수적인', 'adjective', 3),
+('intermittent', '간헐적인', 'adjective', 3),
+('prevalent', '널리 퍼진', 'adjective', 3),
+('provisional', '임시의, 잠정적인', 'adjective', 3),
+('stipulate', '규정하다, 명기하다', 'verb', 3);
