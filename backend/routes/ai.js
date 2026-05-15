@@ -19,7 +19,13 @@ const exampleLimiter = rateLimit({
 const parseAiResponse = (responseText) => {
     const fencedMatch = responseText.match(/```(?:\s*json)?\s*([\s\S]*?)```/i);
     const jsonText = fencedMatch ? fencedMatch[1].trim() : responseText.trim();
-    return JSON.parse(jsonText);
+    const parsed = JSON.parse(jsonText);
+
+    if (!parsed.example_en || !parsed.example_ko) {
+        throw new Error('AI 응답에 필요한 예문 필드가 없습니다.');
+    }
+
+    return parsed;
 };
 
 // [POST] /ai/example - AI 예문 생성 및 캐싱
