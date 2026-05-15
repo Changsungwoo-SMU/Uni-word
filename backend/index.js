@@ -16,6 +16,7 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/test', testRoutes);
 app.use('/words', wordsRoutes);
+app.use('/ai', aiRouter);
 
 app.get('/', (req, res) => {
     res.send('영어 단어 앱 서버 실행 중!');
