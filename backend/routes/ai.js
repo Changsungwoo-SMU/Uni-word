@@ -5,7 +5,9 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const db = require('../config/db');
 const { verifyToken } = require('../middlewares/authMiddleware');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = process.env.GEMINI_API_KEY
+    ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+    : null;
 const exampleLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 5,
@@ -21,8 +23,12 @@ const parseAiResponse = (responseText) => {
 };
 
 // [POST] /ai/example - AI 예문 생성 및 캐싱
-router.post('/example', verifyToken, exampleLimiter, async (req, res) => {
+router.post('/example', exampleLimiter, verifyToken, async (req, res) => {
     try {
+        if (!genAI) {
+            return res.status(500).json({ message: 'GEMINI_API_KEY가 설정되지 않았습니다.' });
+        }
+
         const { word_id } = req.body;
 
         if (!word_id) {
