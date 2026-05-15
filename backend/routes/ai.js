@@ -1,13 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const { GoogleGenerativeAI, SchemaType } = require('@google/generative-ai'); // SchemaType 추가
+const rateLimit = require('express-rate-limit');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const db = require('../config/db');
 const { verifyToken } = require('../middlewares/authMiddleware');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const exampleLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.' },
+});
+
+const parseAiResponse = (responseText) => {
+    const fencedMatch = responseText.match(/```(?:\s*json)?\s*([\s\S]*?)```/i);
+    const jsonText = fencedMatch ? fencedMatch[1].trim() : responseText.trim();
+    return JSON.parse(jsonText);
+};
 
 // [POST] /ai/example - AI 예문 생성 및 캐싱
-router.post('/example', verifyToken, async (req, res) => {
+router.post('/example', verifyToken, exampleLimiter, async (req, res) => {
     try {
         const { word_id } = req.body;
 
@@ -32,10 +46,7 @@ router.post('/example', verifyToken, async (req, res) => {
                 example_ko: wordData.example_ko
             });
         }
-        console.log("모델 호출 시도...");
-        // Gemini 설정: JSON 모드 강제
         const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" });
-        console.log("모델 객체 생성 완료:", model.model);
 
         const prompt = `
             토익 영단어인 '${wordData.word}'(뜻: ${wordData.mean}, 품사: ${wordData.pos || '알 수 없음'})를 사용해서 
@@ -46,16 +57,11 @@ router.post('/example', verifyToken, async (req, res) => {
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
 
-        console.log("AI 응답 원본:", responseText);
-
         let aiData;
         try {
-            // 정규표현식으로 ```json 또는 ``` 및 앞뒤 공백을 모두 제거
-            const cleanedText = responseText.replace(/```json|```/gi, "").trim();
-
-            aiData = JSON.parse(cleanedText);
+            aiData = parseAiResponse(responseText);
         } catch (parseError) {
-            console.error("AI 응답 파싱 실패:", responseText);
+            console.error("AI 응답 파싱 실패:", parseError.message);
             return res.status(502).json({ message: "AI 응답 형식이 올바르지 않습니다." });
         }
 
@@ -64,8 +70,6 @@ router.post('/example', verifyToken, async (req, res) => {
             'UPDATE words SET example_en = ?, example_ko = ? WHERE id = ?',
             [aiData.example_en, aiData.example_ko, word_id]
         );
-
-        console.log("AI 예문이 DB에 성공적으로 저장되었습니다.");
 
         return res.status(200).json({
             message: "AI 예문이 성공적으로 생성되었습니다.",
