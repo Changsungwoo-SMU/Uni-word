@@ -3,6 +3,7 @@ const express = require('express');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const testRoutes = require('./routes/test');
+const levelTestRoutes = require('./routes/leveltest');
 const aiRouter = require('./routes/ai');
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/test', testRoutes);
+app.use('/leveltest', levelTestRoutes);
 app.use('/ai', aiRouter);
 
 app.get('/', (req, res) => {
