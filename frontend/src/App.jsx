@@ -1,21 +1,19 @@
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Login from './Login';
-import Dashboard from './Dashboard';
 import Register from './Register';
-import WordList from './WordList';
 import Home from './Home';
 import Test from './Test';
-import WrongNotes from './WrongNotes';
+import Admin from './Admin';
+import WordList from './WordList';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // 라우트 변경마다 localStorage를 다시 읽어 로그인 상태 반영
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const { isLoggedIn, isAdmin, user, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     navigate('/');
   };
 
@@ -23,19 +21,53 @@ function AppContent() {
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <nav className="bg-white shadow-sm p-4 border-b">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-black text-green-600 tracking-tight">Uni-Word</h1>
+          <Link
+            to={isLoggedIn ? '/home' : '/'}
+            className="text-2xl font-black text-green-600 tracking-tight"
+          >
+            Uni-Word
+          </Link>
           <div className="space-x-4 font-semibold flex items-center">
             {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition"
-              >
-                로그아웃
-              </button>
+              <>
+                {/* 관리자 전용 메뉴 */}
+                {isAdmin && (
+                  <Link
+                    to="/admin/words"
+                    className="text-purple-600 hover:text-purple-700 transition text-sm"
+                  >
+                    단어 관리
+                  </Link>
+                )}
+                {/* 사용자 인사말 + 역할 뱃지 */}
+                <span className="text-sm text-gray-500 hidden sm:inline">
+                  {user?.name || user?.email}
+                  <span
+                    className={`ml-2 text-xs font-bold px-2 py-0.5 rounded-full ${
+                      isAdmin
+                        ? 'bg-purple-50 text-purple-600'
+                        : 'bg-green-50 text-green-600'
+                    }`}
+                  >
+                    {isAdmin ? '관리자' : '학습자'}
+                  </span>
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition"
+                >
+                  로그아웃
+                </button>
+              </>
             ) : (
               <>
-                <Link to="/register" className="text-gray-600 hover:text-green-500">회원가입</Link>
-                <Link to="/" className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition">
+                <Link to="/register" className="text-gray-600 hover:text-green-500">
+                  회원가입
+                </Link>
+                <Link
+                  to="/"
+                  className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition"
+                >
                   로그인
                 </Link>
               </>
@@ -43,15 +75,48 @@ function AppContent() {
           </div>
         </div>
       </nav>
-      <main className="container mx-auto p-4">
+
+      <main className="container mx-auto p-4 pb-12">
         <Routes>
+          {/* 공개 */}
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/wordlist" element={<WordList />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/test" element={<Test />} />
-          <Route path="/wrongnotes" element={<WrongNotes />} />
+
+          {/* 로그인 필요 (학습자/관리자 모두) */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wordlist"
+            element={
+              <ProtectedRoute>
+                <WordList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test"
+            element={
+              <ProtectedRoute>
+                <Test />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 관리자 전용 */}
+          <Route
+            path="/admin/words"
+            element={
+              <ProtectedRoute adminOnly>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </div>
@@ -60,9 +125,11 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 }
 
