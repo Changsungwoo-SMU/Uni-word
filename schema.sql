@@ -58,3 +58,28 @@ CREATE TABLE test_answers (
   FOREIGN KEY (test_result_id) REFERENCES test_results(id),
   FOREIGN KEY (word_id)        REFERENCES words(id)
 );
+
+-- ----------------------------------------------------------------
+-- word_groups: 즐겨찾기 및 단어 그룹 (PBI-favorites)
+-- ----------------------------------------------------------------
+CREATE TABLE word_groups (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  user_id    INT          NOT NULL,
+  name       VARCHAR(100) NOT NULL,
+  is_default BOOLEAN      DEFAULT false,  -- true: 기본 즐겨찾기 그룹 (수정/삭제 불가)
+  created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ----------------------------------------------------------------
+-- word_group_items: 그룹-단어 매핑 (PBI-favorites)
+-- ----------------------------------------------------------------
+CREATE TABLE word_group_items (
+  id       INT AUTO_INCREMENT PRIMARY KEY,
+  group_id INT NOT NULL,
+  word_id  INT NOT NULL,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_group_word (group_id, word_id),
+  FOREIGN KEY (group_id) REFERENCES word_groups(id) ON DELETE CASCADE,
+  FOREIGN KEY (word_id)  REFERENCES words(id) ON DELETE CASCADE
+);
