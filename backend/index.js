@@ -4,6 +4,8 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const testRoutes = require('./routes/test');
 const wordsRoutes = require('./routes/words');
+const levelTestRoutes = require('./routes/leveltest');
+const aiRouter = require('./routes/ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +18,8 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/test', testRoutes);
 app.use('/words', wordsRoutes);
+app.use('/leveltest', levelTestRoutes);
+app.use('/ai', aiRouter);
 
 app.get('/', (req, res) => {
     res.send('영어 단어 앱 서버 실행 중!');

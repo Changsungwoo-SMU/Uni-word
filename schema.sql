@@ -28,7 +28,9 @@ CREATE TABLE words (
   mean       VARCHAR(255) NOT NULL,  -- 한국어 뜻
   pos        VARCHAR(50),            -- 품사 (noun, verb 등)
   level      INT          DEFAULT 1, -- 난이도 (1: 초급, 2: 중급, 3: 고급)
-  created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  example_en TEXT,
+  example_ko TEXT
 );
 
 -- ----------------------------------------------------------------
