@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 
-const MENU_CARDS = [
+const USER_CARDS = [
   {
     label: '영단어장',
-    description: '저장된 단어를 카드로 학습해요',
+    description: '저장된 단어를 살펴봐요',
     icon: '📖',
     path: '/wordlist',
     color: 'hover:border-green-400 hover:shadow-green-100',
@@ -15,37 +16,53 @@ const MENU_CARDS = [
     path: '/test',
     color: 'hover:border-blue-400 hover:shadow-blue-100',
   },
+];
+
+const ADMIN_CARDS = [
   {
-    label: '오답노트',
-    description: '틀린 단어만 모아서 복습해요',
-    icon: '📝',
-    path: '/wrongnotes',
-    color: 'hover:border-red-400 hover:shadow-red-100',
-  },
-  {
-    label: '대시보드',
-    description: '나의 학습 현황을 확인해요',
-    icon: '📊',
-    path: '/dashboard',
+    label: '단어 관리',
+    description: '단어를 추가, 수정, 삭제해요',
+    icon: '🛠️',
+    path: '/admin/words',
     color: 'hover:border-purple-400 hover:shadow-purple-100',
   },
 ];
 
 function Home() {
   const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
+
+  const cards = isAdmin ? ADMIN_CARDS : USER_CARDS;
+  const greetingName = user?.name || user?.email || '사용자';
 
   return (
     <div className="max-w-2xl mx-auto mt-12 px-4">
-      {/* 환영 문구 */}
-      <div className="bg-white border border-gray-100 rounded-3xl shadow-xl px-10 py-8 mb-10 text-center">
-        <p className="text-green-600 font-semibold text-sm mb-2 tracking-wide uppercase">Welcome</p>
-        <h2 className="text-3xl font-extrabold text-gray-800 mb-2">안녕하세요, Uni-Word입니다</h2>
-        <p className="text-gray-500 text-sm">오늘도 꾸준히 단어를 학습해 보세요!</p>
+      {/* 환영 카드 */}
+      <div
+        className={`rounded-3xl shadow-xl px-8 py-10 mb-8 text-white ${
+          isAdmin
+            ? 'bg-gradient-to-br from-purple-500 to-indigo-600'
+            : 'bg-gradient-to-br from-green-500 to-emerald-600'
+        }`}
+      >
+        <p className="font-semibold text-sm mb-2 tracking-wide uppercase opacity-80">
+          {isAdmin ? 'Admin Mode' : 'Welcome'}
+        </p>
+        <h2 className="text-3xl font-extrabold mb-2">
+          {isAdmin
+            ? `${greetingName}님, 단어장을 관리해주세요`
+            : `안녕하세요, ${greetingName}님`}
+        </h2>
+        <p className="text-sm opacity-90">
+          {isAdmin
+            ? '학습자들이 사용하는 단어 데이터를 추가, 수정, 삭제할 수 있어요.'
+            : '오늘도 꾸준히 단어를 학습해 보세요!'}
+        </p>
       </div>
 
-      {/* 메뉴 카드 4개 */}
-      <div className="grid grid-cols-2 gap-4">
-        {MENU_CARDS.map(({ label, description, icon, path, color }) => (
+      {/* 메뉴 카드 */}
+      <div className={`grid gap-4 ${cards.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {cards.map(({ label, description, icon, path, color }) => (
           <button
             key={path}
             onClick={() => navigate(path)}

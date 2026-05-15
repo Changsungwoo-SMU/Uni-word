@@ -1,24 +1,30 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const VALID_EMAIL = 'qwerty123@gmail.com';
-const VALID_PASSWORD = '123!';
+import { api } from './lib/api';
+import { useAuth } from './contexts/AuthContext';
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email !== VALID_EMAIL || password !== VALID_PASSWORD) {
-      setErrorMsg('회원가입 후 로그인 가능합니다');
-      return;
-    }
+    if (submitting) return;
     setErrorMsg('');
-    localStorage.setItem('isLoggedIn', 'true');
-    navigate('/home');
+    setSubmitting(true);
+    try {
+      const data = await api.post('/auth/login', { email, password });
+      login(data.token, data.user);
+      navigate('/home');
+    } catch (err) {
+      setErrorMsg(err.message || '이메일 또는 비밀번호가 일치하지 않습니다.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -50,8 +56,12 @@ function Login() {
           />
         </div>
 
-        <button type="submit" className="w-full bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition mt-6 font-bold text-lg shadow-lg shadow-green-200 transform active:scale-95">
-          로그인하고 시작하기
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition mt-6 font-bold text-lg shadow-lg shadow-green-200 transform active:scale-95 disabled:opacity-50"
+        >
+          {submitting ? '로그인 중...' : '로그인하고 시작하기'}
         </button>
 
         {errorMsg && (
