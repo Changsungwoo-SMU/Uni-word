@@ -1,126 +1,98 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from './lib/api';
 
-const ALL_WORDS = [
-  { word: 'advocate',    meaning: '지지하다, 옹호자' },
-  { word: 'allocate',    meaning: '할당하다, 배분하다' },
-  { word: 'compensate',  meaning: '보상하다, 보충하다' },
-  { word: 'consecutive', meaning: '연속적인, 계속되는' },
-  { word: 'deficiency',  meaning: '결핍, 부족' },
-  { word: 'feasible',    meaning: '실현 가능한, 가능한' },
-  { word: 'initiative',  meaning: '주도권, 계획, 진취성' },
-  { word: 'obligation',  meaning: '의무, 책임' },
-  { word: 'procure',     meaning: '획득하다, 조달하다' },
-  { word: 'substantial', meaning: '상당한, 실질적인' },
-];
-
-function saveWrongNote(word, meaning) {
-  const notes = JSON.parse(localStorage.getItem('uni_word_wrong_notes') || '[]');
-  const existing = notes.find((n) => n.word === word);
-  if (existing) {
-    existing.count += 1;
-  } else {
-    notes.push({ word, meaning, count: 1 });
-  }
-  localStorage.setItem('uni_word_wrong_notes', JSON.stringify(notes));
-}
-
-function saveTestHistory(score, total) {
-  const history = JSON.parse(localStorage.getItem('uni_word_test_history') || '[]');
-  history.unshift({
-    date: new Date().toLocaleDateString('ko-KR'),
-    score,
-    total,
-  });
-  localStorage.setItem('uni_word_test_history', JSON.stringify(history.slice(0, 10)));
-}
+const COUNT_OPTIONS = [5, 10, 20];
 
 function Test() {
   const navigate = useNavigate();
   const inputRef = useRef(null);
 
+  // 'setup' | 'playing' | 'result'
+  const [phase, setPhase] = useState('setup');
+  const [count, setCount] = useState(10);
+
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
-  const [feedback, setFeedback] = useState(null); // null | 'correct' | 'wrong'
-  const [score, setScore] = useState(0);
-  const [finished, setFinished] = useState(false);
-  const [isWrongMode, setIsWrongMode] = useState(false);
+  const [answers, setAnswers] = useState([]);
+  const [result, setResult] = useState(null);
 
-  useEffect(() => {
-    const mode = localStorage.getItem('uni_word_test_mode');
-    if (mode === 'wrong') {
-      localStorage.removeItem('uni_word_test_mode');
-      const notes = JSON.parse(localStorage.getItem('uni_word_wrong_notes') || '[]');
-      setQuestions(notes.length > 0 ? notes : ALL_WORDS);
-      setIsWrongMode(notes.length > 0);
-    } else {
-      setQuestions(ALL_WORDS);
-    }
-  }, []);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (feedback === null && inputRef.current) inputRef.current.focus();
-  }, [currentIndex, feedback]);
-
-  const current = questions[currentIndex];
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!userAnswer.trim()) return;
-
-    const correct = userAnswer.trim().toLowerCase() === current.word.toLowerCase();
-    setFeedback(correct ? 'correct' : 'wrong');
-    if (correct) {
-      setScore((s) => s + 1);
-    } else {
-      saveWrongNote(current.word, current.meaning);
-    }
-  };
-
-  const handleNext = () => {
-    const nextIndex = currentIndex + 1;
-    if (nextIndex >= questions.length) {
-      saveTestHistory(score + (feedback === 'correct' ? 1 : 0), questions.length);
-      setFinished(true);
-    } else {
-      setCurrentIndex(nextIndex);
+  const startTest = async () => {
+    setErrorMsg('');
+    setLoading(true);
+    try {
+      const data = await api.get(`/test/questions?count=${count}`);
+      const qs = data.questions || [];
+      if (qs.length === 0) {
+        setErrorMsg('출제할 단어가 없습니다. 관리자에게 문의해주세요.');
+        return;
+      }
+      setQuestions(qs);
+      setCurrentIndex(0);
       setUserAnswer('');
-      setFeedback(null);
+      setAnswers([]);
+      setResult(null);
+      setPhase('playing');
+    } catch (err) {
+      setErrorMsg(err.message || '문제를 불러오지 못했습니다.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (questions.length === 0) {
-    return <div className="text-center mt-20 text-gray-400">단어를 불러오는 중...</div>;
-  }
+  useEffect(() => {
+    if (phase === 'playing' && inputRef.current) inputRef.current.focus();
+  }, [phase, currentIndex]);
 
-  if (finished) {
-    const finalScore = score;
-    const total = questions.length;
-    const percent = Math.round((finalScore / total) * 100);
+  // ===== Setup 화면 =====
+  if (phase === 'setup') {
     return (
-      <div className="max-w-md mx-auto mt-16 bg-white p-10 border rounded-3xl shadow-xl border-gray-100 text-center">
-        <p className="text-green-600 font-semibold text-sm mb-2 uppercase tracking-wide">테스트 완료!</p>
-        <h2 className="text-4xl font-extrabold text-gray-800 mb-1">
-          {finalScore} <span className="text-xl text-gray-400 font-normal">/ {total}</span>
-        </h2>
-        <p className="text-gray-500 text-sm mb-8">정답률 {percent}%</p>
-        <div className="flex flex-col gap-3">
+      <div className="max-w-md mx-auto mt-12 px-4">
+        <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-10">
+          <p className="text-green-600 font-semibold text-sm mb-2 uppercase tracking-wide text-center">START</p>
+          <h2 className="text-3xl font-extrabold text-gray-800 mb-2 text-center">단어 테스트</h2>
+          <p className="text-sm text-gray-500 text-center mb-8">
+            한국어 뜻을 보고 영어 단어를 입력하세요
+          </p>
+
+          <p className="text-sm font-semibold text-gray-700 mb-3">문제 수 선택</p>
+          <div className="grid grid-cols-3 gap-3 mb-8">
+            {COUNT_OPTIONS.map((n) => (
+              <button
+                key={n}
+                onClick={() => setCount(n)}
+                className={`p-4 rounded-2xl border-2 font-bold text-lg transition ${
+                  count === n
+                    ? 'bg-green-600 text-white border-green-600 shadow-md shadow-green-200'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-green-400'
+                }`}
+              >
+                {n}
+                <span className="block text-xs font-normal opacity-70 mt-0.5">문제</span>
+              </button>
+            ))}
+          </div>
+
+          {errorMsg && (
+            <p className="text-red-500 text-sm text-center mb-4">{errorMsg}</p>
+          )}
+
           <button
-            onClick={() => navigate('/wrongnotes')}
-            className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition font-semibold"
+            onClick={startTest}
+            disabled={loading}
+            className="w-full bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition font-bold text-lg shadow-lg shadow-green-200 active:scale-95 disabled:opacity-50"
           >
-            오답노트 확인하기
+            {loading ? '준비 중...' : '테스트 시작 →'}
           </button>
-          <button
-            onClick={() => { setCurrentIndex(0); setScore(0); setFeedback(null); setUserAnswer(''); setFinished(false); }}
-            className="w-full border border-gray-200 text-gray-600 p-3 rounded-xl hover:border-green-400 hover:text-green-600 transition font-semibold"
-          >
-            다시 테스트
-          </button>
+
           <button
             onClick={() => navigate('/home')}
-            className="text-sm text-gray-400 hover:text-gray-600 transition mt-1"
+            className="w-full mt-3 text-sm text-gray-400 hover:text-gray-600 transition"
           >
             홈으로 돌아가기
           </button>
@@ -129,14 +101,108 @@ function Test() {
     );
   }
 
+  // ===== 결과 화면 =====
+  if (phase === 'result' && result) {
+    const total = result.total_count ?? result.details?.length ?? 0;
+    const correct = result.correct_count ?? 0;
+    const percent = result.score ?? (total ? Math.round((correct / total) * 100) : 0);
+
+    return (
+      <div className="max-w-md mx-auto mt-12 bg-white p-10 border rounded-3xl shadow-xl border-gray-100">
+        <p className="text-green-600 font-semibold text-sm mb-2 uppercase tracking-wide text-center">테스트 완료!</p>
+        <h2 className="text-5xl font-extrabold text-gray-800 mb-2 text-center">
+          {correct} <span className="text-2xl text-gray-300 font-normal">/ {total}</span>
+        </h2>
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-green-500 rounded-full"
+              style={{ width: `${Number(percent)}%` }}
+            />
+          </div>
+          <p className="text-sm font-semibold text-gray-600">{Number(percent).toFixed(0)}%</p>
+        </div>
+
+        {result.details && result.details.length > 0 && (
+          <div className="border-t border-gray-100 pt-4 mb-6">
+            <p className="text-sm font-semibold text-gray-600 mb-3">정답 확인</p>
+            <ul className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+              {result.details.map((d, i) => (
+                <li
+                  key={d.word_id ?? i}
+                  className={`flex items-center justify-between text-sm py-1.5 px-3 rounded-lg ${
+                    d.is_correct ? 'bg-green-50' : 'bg-red-50'
+                  }`}
+                >
+                  <span className="text-gray-400 text-xs">Q{i + 1}</span>
+                  <span className={`font-semibold ${d.is_correct ? 'text-green-600' : 'text-red-500'}`}>
+                    {d.correct_answer} {d.is_correct ? '✓' : '✗'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => setPhase('setup')}
+            className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition font-semibold"
+          >
+            다시 테스트
+          </button>
+          <button
+            onClick={() => navigate('/home')}
+            className="w-full border border-gray-200 text-gray-600 p-3 rounded-xl hover:border-green-400 hover:text-green-600 transition font-semibold"
+          >
+            홈으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== 풀이 화면 =====
+  if (phase !== 'playing' || questions.length === 0) {
+    return <div className="text-center mt-20 text-gray-400">불러오는 중...</div>;
+  }
+
+  const current = questions[currentIndex];
+  const isLast = currentIndex + 1 >= questions.length;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!userAnswer.trim() || submitting) return;
+
+    const newAnswers = [
+      ...answers,
+      { word_id: current.id, user_answer: userAnswer.trim() },
+    ];
+
+    if (isLast) {
+      setSubmitting(true);
+      try {
+        const data = await api.post('/test/submit', { answers: newAnswers });
+        // 서버가 test_results, test_answers 테이블에 저장함 (PBI-4 DoD)
+        setResult(data.result || data);
+        setPhase('result');
+      } catch (err) {
+        alert('채점 중 오류: ' + (err.message || ''));
+      } finally {
+        setSubmitting(false);
+      }
+    } else {
+      setAnswers(newAnswers);
+      setCurrentIndex((i) => i + 1);
+      setUserAnswer('');
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto mt-12 px-4">
-      {/* 헤더 */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-2xl font-extrabold text-gray-800">
-            {isWrongMode ? '오답 테스트' : '단어 테스트'}
-          </h2>
+          <h2 className="text-2xl font-extrabold text-gray-800">단어 테스트</h2>
           <p className="text-sm text-gray-500 mt-0.5">한국어 뜻을 보고 영어 단어를 입력하세요</p>
         </div>
         <span className="text-sm font-semibold text-gray-400">
@@ -144,21 +210,21 @@ function Test() {
         </span>
       </div>
 
-      {/* 진행 바 */}
       <div className="w-full bg-gray-100 rounded-full h-2 mb-8">
         <div
           className="bg-green-500 h-2 rounded-full transition-all"
-          style={{ width: `${((currentIndex) / questions.length) * 100}%` }}
+          style={{ width: `${(currentIndex / questions.length) * 100}%` }}
         />
       </div>
 
-      {/* 문제 카드 */}
       <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-8 mb-6 text-center">
         <p className="text-sm text-gray-400 mb-3">한국어 뜻</p>
-        <p className="text-2xl font-bold text-gray-800">{current.meaning}</p>
+        <p className="text-2xl font-bold text-gray-800">{current.mean}</p>
+        {current.level && (
+          <p className="text-xs text-gray-400 mt-3">난이도 Lv.{current.level}</p>
+        )}
       </div>
 
-      {/* 입력 폼 */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           ref={inputRef}
@@ -166,47 +232,18 @@ function Test() {
           placeholder="영어 단어를 입력하세요"
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
-          disabled={feedback !== null}
-          className={`w-full p-4 border rounded-xl focus:ring-2 focus:outline-none transition text-center text-lg font-semibold ${
-            feedback === 'correct'
-              ? 'border-green-400 bg-green-50 text-green-700 focus:ring-green-400'
-              : feedback === 'wrong'
-              ? 'border-red-400 bg-red-50 text-red-600 focus:ring-red-400'
-              : 'focus:ring-green-400'
-          }`}
+          disabled={submitting}
+          className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-green-400 focus:outline-none transition text-center text-lg font-semibold"
+          autoComplete="off"
         />
 
-        {/* 피드백 */}
-        {feedback === 'correct' && (
-          <div className="text-center py-2">
-            <p className="text-green-600 font-bold text-lg">정답이에요! ✓</p>
-          </div>
-        )}
-        {feedback === 'wrong' && (
-          <div className="text-center py-2">
-            <p className="text-red-500 font-bold text-lg">오답이에요</p>
-            <p className="text-sm text-gray-500 mt-1">
-              정답: <span className="font-semibold text-gray-700">{current.word}</span>
-            </p>
-          </div>
-        )}
-
-        {feedback === null ? (
-          <button
-            type="submit"
-            className="w-full bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition font-bold text-lg shadow-lg shadow-green-200 active:scale-95"
-          >
-            제출하기
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="w-full bg-gray-800 text-white p-4 rounded-xl hover:bg-gray-900 transition font-bold text-lg active:scale-95"
-          >
-            {currentIndex + 1 >= questions.length ? '결과 보기' : '다음 문제 →'}
-          </button>
-        )}
+        <button
+          type="submit"
+          disabled={submitting || !userAnswer.trim()}
+          className="w-full bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition font-bold text-lg shadow-lg shadow-green-200 active:scale-95 disabled:opacity-50"
+        >
+          {submitting ? '채점 중...' : isLast ? '제출하기' : '다음 문제 →'}
+        </button>
       </form>
     </div>
   );
