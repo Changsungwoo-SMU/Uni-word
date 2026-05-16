@@ -3,6 +3,8 @@ import Login from './Login';
 import Register from './Register';
 import Home from './Home';
 import Test from './Test';
+import LevelTest from './LevelTest';
+import AIExample from './AIExample';
 import Admin from './Admin';
 import WordList from './WordList';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -104,6 +106,22 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Test />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/leveltest"
+            element={
+              <ProtectedRoute>
+                <LevelTest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-example"
+            element={
+              <ProtectedRoute>
+                <AIExample />
               </ProtectedRoute>
             }
           />
