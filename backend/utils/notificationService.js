@@ -24,7 +24,7 @@ const notificationService = {
                 // 3. 중복 알림 방지: 읽지 않은 동일한 유형의 알림이 이미 있는지 확인 후 삽입
                 await pool.query(
                     `INSERT INTO notifications (user_id, type, message, link_to) 
-                    SELECT ?, 'TEST', '마지막 테스트 이후 24시간이 지났습니다. 복습 테스트를 진행해볼까요?', '/test/questions'
+                    SELECT ?, 'TEST', '마지막 테스트 이후 24시간이 지났습니다. 복습 테스트를 진행해볼까요?', '/test'
                     WHERE NOT EXISTS (
                         SELECT 1 FROM notifications 
                         WHERE user_id = ? AND type = 'TEST' AND is_read = false
