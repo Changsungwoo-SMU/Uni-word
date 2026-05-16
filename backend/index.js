@@ -5,6 +5,7 @@ const adminRoutes = require('./routes/admin');
 const testRoutes = require('./routes/test');
 const wordsRoutes = require('./routes/words');
 const levelTestRoutes = require('./routes/leveltest');
+const wrongNoteRoutes = require('./routes/wrongnote');
 const favoritesRoutes = require('./routes/favorites');
 const aiRouter = require('./routes/ai');
 
@@ -20,6 +21,7 @@ app.use('/admin', adminRoutes);
 app.use('/test', testRoutes);
 app.use('/words', wordsRoutes);
 app.use('/leveltest', levelTestRoutes);
+app.use('/wrongnotes', wrongNoteRoutes);
 app.use('/favorites', favoritesRoutes);
 app.use('/ai', aiRouter);
 
