@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const pool = require('./config/db');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const testRoutes = require('./routes/test');
@@ -37,13 +38,15 @@ app.get('/home', verifyToken, async (req, res) => {
         // 1. 24시간 체크 및 알림 생성 실행
         await notificationService.checkAndCreateTestReminder(req.user.id);
 
-        // 2. 현재 읽지 않은 최신 테스트 알림이 있는지 확인 (팝업용)
+        // 2. 신규 취약 단어 알림 체크 (정답률 계산 및 24시간 주기 확인) 추가!
+        await notificationService.checkAndCreateWrongVocabReminder(req.user.id);
+
+        // 3. 현재 읽지 않은 최신 테스트 알림이 있는지 확인 (팝업용)
         const [unreadNotifications] = await pool.query(
             "SELECT * FROM notifications WHERE user_id = ? AND type = 'TEST' AND is_read = false ORDER BY created_at DESC LIMIT 1",
             [req.user.id]
         );
 
-        // 3. 홈 화면에 필요한 다른 데이터(예: 오늘의 단어 등)와 함께 응답
         res.json({
             message: "홈 데이터 로드 완료",
             showPopup: unreadNotifications.length > 0, // 팝업을 띄워야 하는지 여부
