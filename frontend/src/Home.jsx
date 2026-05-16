@@ -16,6 +16,13 @@ const USER_CARDS = [
     path: '/test',
     color: 'hover:border-blue-400 hover:shadow-blue-100',
   },
+  {
+    label: '오답노트',
+    description: '틀린 단어를 다시 확인해요',
+    icon: '📝',
+    path: '/wrongnotes',
+    color: 'hover:border-red-400 hover:shadow-red-100',
+  },
 ];
 
 const ADMIN_CARDS = [
@@ -61,7 +68,7 @@ function Home() {
       </div>
 
       {/* 메뉴 카드 */}
-      <div className={`grid gap-4 ${cards.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+      <div className={`grid gap-4 ${cards.length === 1 ? 'grid-cols-1' : cards.length === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'}`}>
         {cards.map(({ label, description, icon, path, color }) => (
           <button
             key={path}

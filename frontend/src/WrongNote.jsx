@@ -9,25 +9,10 @@ function WrongNote() {
 
   // 컴포넌트 마운트 시 오답 단어 목록 조회
   useEffect(() => {
-    // 목업 데이터 (백엔드 완성 전 UI 확인용)
-    // 실제 API에서는 필터링/정렬이 백엔드에서 처리되어 옴
-    const raw = [
-      { id: 1, word: 'negotiate', mean: '협상하다', total: 5, wrong_count: 3, accuracy: 40.0 },
-      { id: 2, word: 'implement', mean: '시행하다', total: 3, wrong_count: 1, accuracy: 66.7 },
-      { id: 3, word: 'allocate', mean: '할당하다', total: 4, wrong_count: 2, accuracy: 50.0 },
-      { id: 4, word: 'obtain', mean: '얻다', total: 10, wrong_count: 1, accuracy: 90.0 },  // 정답률 90% → 제외
-      { id: 5, word: 'suspend', mean: '중단하다', total: 0, wrong_count: 0, accuracy: 0 }, // 미출제 → 제외
-    ];
-
-    // ※ 한 번도 출제되지 않은 단어 제외 (total === 0)
-    // ※ 정답률 90% 미만인 단어만 포함
-    // ※ wrong_count 내림차순 정렬
-    const filtered = raw
-      .filter((w) => w.total > 0 && w.accuracy < 90)
-      .sort((a, b) => b.wrong_count - a.wrong_count);
-
-    setWrongWords(filtered);
-    setLoading(false);
+    api.get('/wrongnotes')
+      .then((data) => setWrongWords(data.wrong_words || []))
+      .catch((err) => setErrorMsg(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
   // 로딩 중
