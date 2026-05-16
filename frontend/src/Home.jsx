@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { api } from './lib/api';
 
 const USER_CARDS = [
   {
@@ -31,12 +33,55 @@ const ADMIN_CARDS = [
 function Home() {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
+  const [popup, setPopup] = useState(null);
+
+  useEffect(() => {
+    api.get('/home')
+      .then((data) => {
+        if (data.showPopup && data.popupData) setPopup(data.popupData);
+      })
+      .catch(() => {});
+  }, []);
+
+  const closePopup = async () => {
+    if (popup?.id) await api.patch(`/notifications/${popup.id}/read`).catch(() => {});
+    setPopup(null);
+  };
+
+  const handlePopupAction = async () => {
+    const link = popup?.link_to || '/test';
+    if (popup?.id) await api.patch(`/notifications/${popup.id}/read`).catch(() => {});
+    setPopup(null);
+    navigate(link);
+  };
 
   const cards = isAdmin ? ADMIN_CARDS : USER_CARDS;
   const greetingName = user?.name || user?.email || '사용자';
 
   return (
     <div className="max-w-2xl mx-auto mt-12 px-4">
+      {popup && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full">
+            <p className="text-base font-bold text-gray-800 mb-2">복습 알림</p>
+            <p className="text-sm text-gray-600 mb-6">{popup.message}</p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handlePopupAction}
+                className="w-full bg-green-600 text-white p-3 rounded-xl font-semibold hover:bg-green-700 transition"
+              >
+                테스트 하러 가기
+              </button>
+              <button
+                onClick={closePopup}
+                className="w-full border border-gray-200 text-gray-500 p-3 rounded-xl font-semibold hover:border-gray-400 transition"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* 환영 카드 */}
       <div
         className={`rounded-3xl shadow-xl px-8 py-10 mb-8 text-white ${
