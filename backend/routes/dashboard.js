@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const verifyToken = require('../middleware/auth');
+const { verifyToken } = require('../middlewares/authMiddleware');
 
 /**
  * 대시보드 종합 데이터 조회 (GET /dashboard)
