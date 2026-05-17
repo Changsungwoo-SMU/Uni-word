@@ -83,3 +83,17 @@ CREATE TABLE word_group_items (
   FOREIGN KEY (group_id) REFERENCES word_groups(id) ON DELETE CASCADE,
   FOREIGN KEY (word_id)  REFERENCES words(id) ON DELETE CASCADE
 );
+
+-- ----------------------------------------------------------------
+-- notifications: 알림 내역 (복습 알림 및 취약단어 알림)
+-- ----------------------------------------------------------------
+CREATE TABLE notifications (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT NOT NULL,                  -- 알림을 받을 사용자
+  type         ENUM('TEST', 'WRONG_VOCAB') NOT NULL, -- 알림 유형 (24시간 경과 테스트, 취약단어)
+  message      VARCHAR(255) NOT NULL,         -- 사용자에게 노출될 문구
+  link_to      VARCHAR(100) NOT NULL,         -- 클릭 시 이동할 경로 (예: /test, /wrong-words)
+  is_read      BOOLEAN DEFAULT FALSE,         -- 읽음 처리 여부
+  created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
