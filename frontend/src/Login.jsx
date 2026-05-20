@@ -29,15 +29,15 @@ function Login() {
 
   return (
     <div className="max-w-md mx-auto mt-16 bg-white p-10 border rounded-3xl shadow-xl border-gray-100">
-      <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-800">Uni-Word 로그인</h2>
+      <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-900">Uni-Word 로그인</h2>
 
       <form onSubmit={handleLogin} className="space-y-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1.5">이메일</label>
+          <label className="block text-sm font-semibold text-gray-800 mb-1.5">이메일</label>
           <input
             type="email"
             placeholder="이메일을 입력하세요"
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-400 focus:outline-none transition"
+            className="w-full p-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-400 focus:outline-none transition"
             value={email}
             onChange={(e) => { setEmail(e.target.value); setErrorMsg(''); }}
             required
@@ -45,11 +45,11 @@ function Login() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1.5">비밀번호</label>
+          <label className="block text-sm font-semibold text-gray-800 mb-1.5">비밀번호</label>
           <input
             type="password"
             placeholder="비밀번호를 입력하세요"
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-400 focus:outline-none transition"
+            className="w-full p-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-400 focus:outline-none transition"
             value={password}
             onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
             required

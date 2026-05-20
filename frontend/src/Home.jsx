@@ -149,8 +149,8 @@ function Home() {
             className={`bg-white border border-gray-100 rounded-2xl p-6 text-left shadow-sm hover:shadow-md transition-all ${color} active:scale-95`}
           >
             <span className="text-3xl mb-3 block">{icon}</span>
-            <p className="font-bold text-gray-800 text-lg leading-tight">{label}</p>
-            <p className="text-gray-400 text-xs mt-1">{description}</p>
+            <p className="font-bold text-gray-900 text-lg leading-tight">{label}</p>
+            <p className="text-gray-600 text-xs mt-1">{description}</p>
           </button>
         ))}
       </div>
