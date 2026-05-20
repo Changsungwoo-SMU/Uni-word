@@ -6,6 +6,7 @@ import Test from './Test';
 import AIExample from './AIExample';
 import Admin from './Admin';
 import WordList from './WordList';
+import Dashboard from './Dashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -113,6 +114,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <AIExample />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
               </ProtectedRoute>
             }
           />
