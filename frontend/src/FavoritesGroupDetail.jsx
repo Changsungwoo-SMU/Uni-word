@@ -28,6 +28,13 @@ function FavoritesGroupDetail() {
   const [removingId, setRemovingId] = useState(null);
   const [starringId, setStarringId] = useState(null);
 
+  // 단어 추가 패널
+  const [showAddPanel, setShowAddPanel] = useState(false);
+  const [allWords, setAllWords] = useState([]);
+  const [allWordsLoading, setAllWordsLoading] = useState(false);
+  const [addSearch, setAddSearch] = useState('');
+  const [addingId, setAddingId] = useState(null);
+
   const fetchWords = useCallback(() => {
     setLoading(true);
     setError('');
@@ -41,6 +48,34 @@ function FavoritesGroupDetail() {
   }, [id]);
 
   useEffect(() => { fetchWords(); }, [fetchWords]);
+
+  const openAddPanel = () => {
+    setShowAddPanel(true);
+    setAddSearch('');
+    if (allWords.length === 0) {
+      setAllWordsLoading(true);
+      api.get('/words')
+        .then((data) => {
+          const list = Array.isArray(data) ? data : data.words || [];
+          setAllWords(list);
+        })
+        .catch(() => {})
+        .finally(() => setAllWordsLoading(false));
+    }
+  };
+
+  const handleAddWord = async (wordId) => {
+    if (addingId) return;
+    setAddingId(wordId);
+    try {
+      await api.post(`/favorites/groups/${id}/words`, { word_id: wordId });
+      fetchWords();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAddingId(null);
+    }
+  };
 
   const handleStarToggle = async (wordId) => {
     if (starringId) return;
@@ -71,6 +106,15 @@ function FavoritesGroupDetail() {
       setRemovingId(null);
     }
   };
+
+  // 이미 그룹에 있는 단어 제외 + 검색 필터
+  const groupWordIds = new Set(words.map((w) => w.id));
+  const filteredAllWords = allWords.filter((w) => {
+    if (groupWordIds.has(w.id)) return false;
+    if (!addSearch.trim()) return true;
+    const q = addSearch.toLowerCase();
+    return w.word.toLowerCase().includes(q) || w.mean.includes(addSearch);
+  });
 
   if (loading) {
     return (
@@ -131,7 +175,7 @@ function FavoritesGroupDetail() {
         </div>
       )}
 
-      {/* 단어 목록 */}
+      {/* 그룹 내 단어 목록 */}
       <div className="space-y-3">
         {words.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-2xl px-6 py-10 text-center shadow-sm">
@@ -180,7 +224,7 @@ function FavoritesGroupDetail() {
                   </div>
                   <div className="shrink-0 pt-0.5">
                     {isDefault ? (
-                      /* 기본 그룹: 별 버튼으로 토글 제거 */
+                      /* 기본 그룹: 별 버튼으로 즐겨찾기 토글 제거 */
                       <button
                         onClick={() => handleStarToggle(word.id)}
                         disabled={starringId === word.id}
@@ -206,6 +250,62 @@ function FavoritesGroupDetail() {
               )}
             </div>
           ))
+        )}
+      </div>
+
+      {/* 단어 추가 패널 */}
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+        <button
+          onClick={() => (showAddPanel ? setShowAddPanel(false) : openAddPanel())}
+          className="w-full px-5 py-4 flex items-center justify-between text-sm font-semibold text-gray-600 hover:bg-gray-50 transition"
+        >
+          <span>+ 단어 추가</span>
+          <span className="text-gray-400 text-xs">{showAddPanel ? '닫기 ▲' : '열기 ▼'}</span>
+        </button>
+
+        {showAddPanel && (
+          <div className="border-t border-gray-100 px-5 pb-5 pt-4 space-y-3">
+            <input
+              type="text"
+              placeholder="영단어 또는 한국어 뜻으로 검색"
+              value={addSearch}
+              onChange={(e) => setAddSearch(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 transition"
+            />
+            {allWordsLoading ? (
+              <div className="flex justify-center py-4">
+                <div className="w-6 h-6 border-2 border-yellow-200 border-t-yellow-400 rounded-full animate-spin" />
+              </div>
+            ) : filteredAllWords.length === 0 ? (
+              <p className="text-center text-gray-400 text-sm py-4">
+                {addSearch.trim() ? '검색 결과가 없어요' : '추가할 수 있는 단어가 없어요'}
+              </p>
+            ) : (
+              <ul className="max-h-64 overflow-y-auto space-y-2 pr-1">
+                {filteredAllWords.map((w) => (
+                  <li
+                    key={w.id}
+                    className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2.5"
+                  >
+                    <div className="min-w-0">
+                      <span className="font-semibold text-gray-800 text-sm">{w.word}</span>
+                      <span className="text-gray-500 text-xs ml-2">{w.mean}</span>
+                      <span className={`ml-2 text-xs font-semibold border px-1.5 py-0.5 rounded-full ${LEVEL_COLOR[w.level] ?? 'bg-gray-50 text-gray-500 border-gray-200'}`}>
+                        {LEVEL_LABEL[w.level] ?? w.level}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleAddWord(w.id)}
+                      disabled={addingId === w.id}
+                      className="ml-3 px-3 py-1 bg-yellow-400 text-white text-xs font-semibold rounded-lg hover:bg-yellow-500 transition disabled:opacity-50 shrink-0"
+                    >
+                      {addingId === w.id ? '추가 중...' : '추가'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
       </div>
 
