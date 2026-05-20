@@ -46,6 +46,13 @@ const USER_CARDS = [
     path: '/favorites/groups',
     color: 'hover:border-yellow-400 hover:shadow-yellow-100',
   },
+  {
+    label: '대시보드',
+    description: '나의 학습 현황을 한눈에 확인해요',
+    icon: '📈',
+    path: '/dashboard',
+    color: 'hover:border-teal-400 hover:shadow-teal-100',
+  },
 ];
 
 const ADMIN_CARDS = [
