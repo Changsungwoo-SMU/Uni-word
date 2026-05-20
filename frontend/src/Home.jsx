@@ -18,6 +18,34 @@ const USER_CARDS = [
     path: '/test',
     color: 'hover:border-blue-400 hover:shadow-blue-100',
   },
+  {
+    label: '오답노트',
+    description: '틀린 단어를 다시 확인해요',
+    icon: '📝',
+    path: '/wrongnotes',
+    color: 'hover:border-red-400 hover:shadow-red-100',
+  },
+  {
+    label: 'AI 예문 생성',
+    description: 'AI가 토익 예문을 만들어드려요',
+    icon: '🤖',
+    path: '/ai-example',
+    color: 'hover:border-indigo-400 hover:shadow-indigo-100',
+  },
+  {
+    label: '수준별 테스트',
+    description: '나의 수준에 맞는 단어를 테스트해요',
+    icon: '📊',
+    path: '/leveltest',
+    color: 'hover:border-purple-400 hover:shadow-purple-100',
+  },
+  {
+    label: '즐겨찾기·그룹',
+    description: '단어를 그룹으로 묶어 관리해요',
+    icon: '⭐',
+    path: '/favorites/groups',
+    color: 'hover:border-yellow-400 hover:shadow-yellow-100',
+  },
 ];
 
 const ADMIN_CARDS = [
