@@ -3,6 +3,7 @@ import Login from './Login';
 import Register from './Register';
 import Home from './Home';
 import Test from './Test';
+import LevelTest from './LevelTest';
 import Admin from './Admin';
 import WordList from './WordList';
 import FavoritesGroup from './FavoritesGroup';
@@ -111,6 +112,14 @@ function AppContent() {
             }
           />
           <Route
+            path="/leveltest"
+            element={
+              <ProtectedRoute>
+                <LevelTest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
@@ -118,7 +127,6 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/favorites/groups"
             element={

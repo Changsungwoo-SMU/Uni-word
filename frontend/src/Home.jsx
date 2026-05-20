@@ -17,6 +17,13 @@ const USER_CARDS = [
     color: 'hover:border-blue-400 hover:shadow-blue-100',
   },
   {
+    label: '수준별 테스트',
+    description: '나의 수준에 맞는 단어를 테스트해요',
+    icon: '📊',
+    path: '/leveltest',
+    color: 'hover:border-purple-400 hover:shadow-purple-100',
+  },
+  {
     label: '즐겨찾기·그룹',
     description: '단어를 그룹으로 묶어 관리해요',
     icon: '⭐',

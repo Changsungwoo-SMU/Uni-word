@@ -9,6 +9,7 @@ const levelTestRoutes = require('./routes/leveltest');
 const wrongNoteRoutes = require('./routes/wrongnote');
 const favoritesRoutes = require('./routes/favorites');
 const aiRouter = require('./routes/ai');
+const dashboardRoutes = require('./routes/dashboard');
 const notificationRoutes = require('./routes/notification');
 const notificationService = require('./utils/notificationService');
 const { verifyToken } = require('./middlewares/authMiddleware');
@@ -28,6 +29,7 @@ app.use('/leveltest', levelTestRoutes);
 app.use('/wrongnotes', wrongNoteRoutes);
 app.use('/favorites', favoritesRoutes);
 app.use('/ai', aiRouter);
+app.use('/dashboard', dashboardRoutes);
 app.use('/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
