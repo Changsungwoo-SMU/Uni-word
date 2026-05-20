@@ -23,6 +23,13 @@ const USER_CARDS = [
     path: '/leveltest',
     color: 'hover:border-purple-400 hover:shadow-purple-100',
   },
+  {
+    label: '즐겨찾기·그룹',
+    description: '단어를 그룹으로 묶어 관리해요',
+    icon: '⭐',
+    path: '/favorites/groups',
+    color: 'hover:border-yellow-400 hover:shadow-yellow-100',
+  },
 ];
 
 const ADMIN_CARDS = [

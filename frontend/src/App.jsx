@@ -6,6 +6,8 @@ import Test from './Test';
 import LevelTest from './LevelTest';
 import Admin from './Admin';
 import WordList from './WordList';
+import FavoritesGroup from './FavoritesGroup';
+import FavoritesGroupDetail from './FavoritesGroupDetail';
 import Dashboard from './Dashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -125,7 +127,22 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/favorites/groups"
+            element={
+              <ProtectedRoute>
+                <FavoritesGroup />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/favorites/groups/:id"
+            element={
+              <ProtectedRoute>
+                <FavoritesGroupDetail />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 관리자 전용 */}
           <Route
