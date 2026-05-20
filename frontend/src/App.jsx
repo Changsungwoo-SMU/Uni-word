@@ -3,6 +3,7 @@ import Login from './Login';
 import Register from './Register';
 import Home from './Home';
 import Test from './Test';
+import AIExample from './AIExample';
 import LevelTest from './LevelTest';
 import Admin from './Admin';
 import WordList from './WordList';
@@ -108,6 +109,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Test />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-example"
+            element={
+              <ProtectedRoute>
+                <AIExample />
               </ProtectedRoute>
             }
           />
