@@ -4,7 +4,6 @@ import Register from './Register';
 import Home from './Home';
 import Test from './Test';
 import LevelTest from './LevelTest';
-import AIExample from './AIExample';
 import Admin from './Admin';
 import WordList from './WordList';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -117,15 +116,6 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/ai-example"
-            element={
-              <ProtectedRoute>
-                <AIExample />
-              </ProtectedRoute>
-            }
-          />
-
           {/* 관리자 전용 */}
           <Route
             path="/admin/words"

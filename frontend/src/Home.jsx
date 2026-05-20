@@ -23,13 +23,6 @@ const USER_CARDS = [
     path: '/leveltest',
     color: 'hover:border-purple-400 hover:shadow-purple-100',
   },
-  {
-    label: 'AI 예문 생성',
-    description: 'AI가 토익 예문을 만들어드려요',
-    icon: '🤖',
-    path: '/ai-example',
-    color: 'hover:border-indigo-400 hover:shadow-indigo-100',
-  },
 ];
 
 const ADMIN_CARDS = [
