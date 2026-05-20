@@ -7,6 +7,7 @@ import AIExample from './AIExample';
 import LevelTest from './LevelTest';
 import Admin from './Admin';
 import WordList from './WordList';
+import WrongNote from './WrongNote';
 import FavoritesGroup from './FavoritesGroup';
 import FavoritesGroupDetail from './FavoritesGroupDetail';
 import Dashboard from './Dashboard';
@@ -87,7 +88,7 @@ function AppContent() {
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* 로그인 필요 (학습자/관리자 모두) */}
+          {/* 로그인 필요 (학습자/관리자 모두) */}  
           <Route
             path="/home"
             element={
@@ -149,6 +150,15 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <FavoritesGroupDetail />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/wrongnotes"
+            element={
+              <ProtectedRoute>
+                <WrongNote />
               </ProtectedRoute>
             }
           />

@@ -17,6 +17,13 @@ const USER_CARDS = [
     color: 'hover:border-blue-400 hover:shadow-blue-100',
   },
   {
+    label: '오답노트',
+    description: '틀린 단어를 다시 확인해요',
+    icon: '📝',
+    path: '/wrongnotes',
+    color: 'hover:border-red-400 hover:shadow-red-100',
+  },
+  {
     label: 'AI 예문 생성',
     description: 'AI가 토익 예문을 만들어드려요',
     icon: '🤖',
